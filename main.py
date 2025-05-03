@@ -37,7 +37,7 @@ def sidebar():
             for k in list(st.session_state.keys()):
                 if k.startswith("feedback_") or k.startswith("rating_"):
                     del st.session_state[k]
-            st.experimental_rerun()
+            st.rerun()
 
 def feedback_form(idx, run_id, client):
     key = f"feedback_{idx}"
@@ -55,7 +55,7 @@ def feedback_form(idx, run_id, client):
                 if comment:
                     client.create_feedback(run_id=run_id, key="user_comment", comment=comment)
                 st.session_state[key] = True
-                st.experimental_rerun()
+                st.rerun()
 
 async def run_workflow(query: str):
     graph = get_workflow().compile()
