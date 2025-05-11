@@ -47,7 +47,7 @@ def feedback_form(idx, run_id, client):
         with st.form(f"form_{idx}"):
             ratings = {}
             for cat in ["Accuracy","Relevance","Clarity","Completeness","Satisfaction"]:
-                ratings[cat] = st.selectbox(cat, [1,2,3,4,5], format_func=lambda x: "★"*x+"☆"*(5-x), key=f"{cat}_{idx}")
+                ratings[cat] = st.selectbox(cat, [1,2,3,4,5], format_func=lambda x:"★"*x+"☆"*(5-x), key=f"{cat}_{idx}")
             comment = st.text_area("Comments (optional)", key=f"comment_{idx}")
             if st.form_submit_button("Submit"):
                 for cat, val in ratings.items():
@@ -70,7 +70,7 @@ async def run_workflow(query: str):
     if final and "generation" in final:
         answer = final["generation"]
     else:
-        answer = "I’m sorry, I couldn’t find an answer in the Insurance Code."
+        answer = "I'm sorry, I couldn't find an answer in the Insurance Code."
     if cb.traced_runs:
         run_id = str(cb.traced_runs[-1].id)
     return answer, run_id
