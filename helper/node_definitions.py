@@ -1,8 +1,3 @@
-# Hyperparameters for the retriever
-RETRIEVER_SEARCH_K    = 5    # higher = consider more docs; range = [1, ∞)
-RETRIEVER_FETCH_K     = 20   # higher = fetch more docs;     range = [1, ∞)
-RETRIEVER_LAMBDA_MULT = 0.3  # higher = more diversity;     range = [0.0, 1.0]
-
 import asyncio
 from langchain_core.messages import HumanMessage, SystemMessage
 import difflib
@@ -14,10 +9,11 @@ from helper.prompt_templates import (
 )
 from helper.workflow_graph import MAX_HALL, MAX_VERIFY
 
+RETRIEVER_SEARCH_K    = 5    # higher = consider more docs; range = [1, inf)
+RETRIEVER_FETCH_K     = 20   # higher = fetch more docs;     range = [1, inf)
+RETRIEVER_LAMBDA_MULT = 0.3  # higher = more diversity;     range = [0.0, 1.0]
+
 def create_multi_query_chain(llm_primary):
-    """
-    Create a chain that generates multiple query rewrites.
-    """
     from langchain_core.output_parsers import StrOutputParser
     return (
         multi_query_template
@@ -27,9 +23,6 @@ def create_multi_query_chain(llm_primary):
     )
 
 def create_retriever(vector_store, multi_chain, rrf_fn):
-    """
-    Build the retriever pipeline (MMR + RRF).
-    """
     return (
         multi_chain
         | vector_store.as_retriever(
@@ -44,13 +37,11 @@ def create_retriever(vector_store, multi_chain, rrf_fn):
     )
 
 def init_and_route(state, llm_primary):
-    """
-    Initialize conversation state and pick a data source.
-    """
     if "original" not in state:
         state["original"] = state["question"]
         state["hall_attempts"]  = 0
         state["verify_attempts"] = 0
+
     out = llm_primary.with_structured_output(method="json_mode").invoke([
         SystemMessage(router_template.format(vectorstore_summary=vectorstore_summary)),
         HumanMessage(state["question"])
@@ -58,9 +49,6 @@ def init_and_route(state, llm_primary):
     return out["Datasource"]
 
 def document_retriever(state, retriever):
-    """
-    Retrieve docs from the vector store.
-    """
     docs = retriever.invoke({
         "question": state["question"],
         "num_queries": 3,
@@ -69,9 +57,6 @@ def document_retriever(state, retriever):
     return {"documents": docs, "doc_checker": None}
 
 async def grade_docs(state, llm_fast):
-    """
-    Grade each retrieved doc for relevance.
-    """
     tasks = [
         llm_fast.with_structured_output(method="json_mode").ainvoke(
             relevance_template.format(document=d, question=state["question"])
@@ -85,35 +70,23 @@ async def grade_docs(state, llm_fast):
     return {"documents": passed, "doc_checker": checker}
 
 def web_search_node(state, web_tool):
-    """
-    Perform web-search fallback.
-    """
     hits  = web_tool.invoke(state["question"])
     pages = [{"metadata":{"title":r["title"],"url":r["url"]},"page_content":r["content"]} for r in hits]
     return {"documents": state.get("documents", []) + pages}
 
 def gen_answer(state, llm_primary):
-    """
-    Generate the final answer using the LLM, letting the prompt handle citation formatting.
-    """
     q      = state.get("original", state["question"])
     prompt = answer_template.format(context=state["documents"], question=q)
     resp   = llm_primary.invoke(prompt)
     return {"generation": resp.content}
 
 def hallucination_checker(state, llm_fast):
-    """
-    Check answer for hallucinations.
-    """
     out = llm_fast.with_structured_output(method="json_mode").invoke(
         hallucination_template.format(documents=state["documents"], generation=state["generation"])
     )
     return {"hall_checker": out["binary_score"].lower()}
 
 def answer_verifier(state, llm_fast):
-    """
-    Verify answer correctness.
-    """
     q   = state.get("original", state["question"])
     out = llm_fast.with_structured_output(method="json_mode").invoke(
         verification_template.format(question=q, generation=state["generation"])
@@ -121,9 +94,6 @@ def answer_verifier(state, llm_fast):
     return {"verify_checker": out["binary_score"].lower()}
 
 def rewrite_query(state, llm_primary):
-    """
-    Rewrite the query after failure.
-    """
     out = llm_primary.with_structured_output(method="json_mode").invoke(
         rewrite_template.format(
             question=state["question"],
@@ -134,9 +104,6 @@ def rewrite_query(state, llm_primary):
     return {"question": out["rewritten_question"]}
 
 def chitchat_node(state, llm_fast):
-    """
-    Handle off-topic queries.
-    """
     resp = llm_fast.invoke([
         SystemMessage(chitchat_template.format(scope_definition=scope_definition)),
         HumanMessage(state["question"])
@@ -144,15 +111,9 @@ def chitchat_node(state, llm_fast):
     return {"generation": resp.content}
 
 def decide_after_docs(state):
-    """
-    Decide websearch vs generate.
-    """
     return "Websearch" if state["doc_checker"]=="fail" else "Generate"
 
 def decide_after_hall(state):
-    """
-    Decide next step after hallucination check.
-    """
     if state["hall_checker"] == "pass":
         return "AnswerVerifier"
     if state["hall_attempts"] >= MAX_HALL:
@@ -160,9 +121,6 @@ def decide_after_hall(state):
     return "HallFail"
 
 def decide_after_verify(state):
-    """
-    Decide next step after verification.
-    """
     if state["verify_checker"] == "pass":
         return "__end__"
     if state["verify_attempts"] >= MAX_VERIFY:
@@ -170,13 +128,7 @@ def decide_after_verify(state):
     return "VerFail"
 
 def hall_fail_node(state):
-    """
-    Increment hallucination failure counter.
-    """
     return {"hall_attempts": state["hall_attempts"] + 1}
 
 def ver_fail_node(state):
-    """
-    Increment verification failure counter.
-    """
     return {"verify_attempts": state["verify_attempts"] + 1}

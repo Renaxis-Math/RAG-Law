@@ -1,7 +1,3 @@
-# Hyperparameters for PDF ingestion chunking
-PDF_CHUNK_SIZE    = 500  # higher = larger text chunks; range = [1, ∞)
-PDF_CHUNK_OVERLAP = 50   # higher = more overlap;      range = [0, PDF_CHUNK_SIZE]
-
 import os
 import glob
 import re
@@ -9,11 +5,10 @@ from typing import List
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.documents import Document
 
+PDF_CHUNK_SIZE    = 500  # higher = larger text chunks; range = [1, ∞)
+PDF_CHUNK_OVERLAP = 50   # higher = more overlap;      range = [0, PDF_CHUNK_SIZE]
+
 def extract_structure(text: str, last: dict) -> dict:
-    """
-    Extract Part, Chapter, Article, Rule/Section from text using regex.
-    If not found, use last known value.
-    """
     structure = last.copy()
     part_match = re.search(r"PART\s+([\w\d\-]+)", text, re.IGNORECASE)
     chapter_match = re.search(r"CHAPTER\s+([\w\d\-]+)", text, re.IGNORECASE)
@@ -34,9 +29,6 @@ def extract_structure(text: str, last: dict) -> dict:
     return structure
 
 def parse_pdf(path: str, source: str) -> List[Document]:
-    """
-    Parse a PDF file into Document objects, one per sentence, extracting structure info.
-    """
     docs: List[Document] = []
     last_structure = {"part": None, "chapter": None, "article": None, "rule": None}
     try:
@@ -45,6 +37,7 @@ def parse_pdf(path: str, source: str) -> List[Document]:
         for page in pages:
             page.metadata = page.metadata or {}
             page.metadata["source"] = source
+            
             # Split page into sentences
             sentences = re.split(r'(?<=[.!?]) +', page.page_content)
             running_structure = last_structure.copy()
@@ -52,41 +45,38 @@ def parse_pdf(path: str, source: str) -> List[Document]:
                 sent = sent.strip()
                 if not sent:
                     continue
+                
                 # Update structure if this sentence starts a new part/chapter/article/rule
                 running_structure = extract_structure(sent, running_structure)
-                # Build metadata for this sentence
                 meta = page.metadata.copy()
+                
                 # Only include non-None fields, in strict order
                 for key in ["part", "chapter", "article", "rule"]:
                     if running_structure.get(key) is not None:
                         meta[key] = running_structure[key]
+
                 docs.append(Document(page_content=sent, metadata=meta))
             last_structure = running_structure
+
     except Exception as e:
         print(f"Error parsing {path}: {e}")
     return docs
 
 def check_document_exists(vector_store, source_name: str) -> bool:
-    """
-    Check if a document with the given source name already exists in the vector store.
-    """
     try:
-        # Search for documents with matching source metadata
+
         results = vector_store.similarity_search(
-            query="",  # Empty query to get all documents
-            k=1,  # We only need to know if any exist
+            query="",
+            k = 1,                              # We only need to know if any exist
             filter={"source": source_name}
         )
         return len(results) > 0
+
     except Exception as e:
         print(f"Error checking document existence: {e}")
         return False
 
 def ingest_pdfs(data_dir: str, vector_store) -> int:
-    """
-    Load all PDFs from data_dir, split into sentences, and add to vector_store.
-    Skips PDFs that already exist in the database.
-    """
     pdf_paths = glob.glob(os.path.join(data_dir, "*.pdf"))
     all_sentences: List[Document] = []
     skipped_count = 0

@@ -22,26 +22,15 @@ You must respond with a valid JSON object in this exact format:
 """
 
 def check_entities(question: str, llm: ChatOpenAI) -> Tuple[bool, bool, str]:
-    """
-    Check if the question is related to California insurance law.
-    
-    Args:
-        question: The user's question
-        llm: The language model to use for entity extraction
-        
-    Returns:
-        Tuple of (has_california, has_insurance, clarifying_question)
-        If both are True, clarifying_question will be empty
-    """
-    # Get entity analysis
+
     response = llm.invoke([
         SystemMessage(ENTITY_CHECK_TEMPLATE),
         HumanMessage(question)
     ])
     
     try:
-        # Extract JSON from the response content
         response_text = response.content
+        
         # Find the first { and last } to extract the JSON object
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
@@ -56,7 +45,6 @@ def check_entities(question: str, llm: ChatOpenAI) -> Tuple[bool, bool, str]:
 
     except (json.JSONDecodeError, KeyError, ValueError) as e:
         print(f"Error parsing response: {e}")
-        # Default to False if we can't parse the response
         has_california = False
         has_insurance = False
     

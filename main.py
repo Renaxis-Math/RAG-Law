@@ -64,7 +64,6 @@ def feedback_form(idx, run_id, client):
                 st.rerun()
 
 async def run_workflow(query: str):
-    # Initialize LLM for entity checking
     llm = ChatOpenAI(
         model="gpt-4",
         temperature=0.0
@@ -72,8 +71,6 @@ async def run_workflow(query: str):
     
     # Check entities first
     has_california, has_insurance, clarifying_question = check_entities(query, llm)
-    
-    # If missing required entities, return clarifying question
     if not (has_california and has_insurance):
         return clarifying_question, None
     

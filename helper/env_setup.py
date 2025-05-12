@@ -1,14 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-# Load environment variables and configure tracing for LangSmith
 def load_environment():
-    """
-    Load environment variables and set up LangSmith tracing.
-    
-    Returns:
-        dict of required environment variables.
-    """
     load_dotenv()
     OPENAI_API_KEY   = os.getenv("OPENAI_API_KEY")
     DB_CONNECTION    = os.getenv("DB_CONNECTION")
