@@ -1,10 +1,11 @@
 # Hyperparameters for the retriever
-RETRIEVER_SEARCH_K    = 3    # higher = consider more docs; range = [1, ∞)
-RETRIEVER_FETCH_K     = 15   # higher = fetch more docs;     range = [1, ∞)
-RETRIEVER_LAMBDA_MULT = 0.5  # higher = more diversity;     range = [0.0, 1.0]
+RETRIEVER_SEARCH_K    = 5    # higher = consider more docs; range = [1, ∞)
+RETRIEVER_FETCH_K     = 20   # higher = fetch more docs;     range = [1, ∞)
+RETRIEVER_LAMBDA_MULT = 0.3  # higher = more diversity;     range = [0.0, 1.0]
 
 import asyncio
 from langchain_core.messages import HumanMessage, SystemMessage
+import difflib
 
 from helper.prompt_templates import (
     router_template, multi_query_template, relevance_template,

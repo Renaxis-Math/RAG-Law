@@ -47,16 +47,23 @@ Use the following context to answer the question:
 Context: {context}
 Question: {question}
 
-For each part of your answer:
+Follow these requirements for citations in your answer:
 - If you use a sentence or phrase directly from the context, wrap it in double quotes and add a citation in parentheses with the format:
   (Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}})
 - If you paraphrase or summarize a sentence or phrase from the context, italicize your paraphrase and add a citation in parentheses, starting with the original phrase/sentence from the document, followed by the part/chapter/article/rule:
   (*your paraphrase* (original phrase from document, Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}}))
 - Only cite if the information comes from the context.
+- Omit any field that is missing, but always keep the order: Part, Chapter, Article, Rule.
 
-Example:
-"The commissioner may in writing disapprove the use of any true or fictitious name." (Part 2, Chapter 5, Article 12, Rule 1724.5)
-*The commissioner can reject a business name in writing.* (The commissioner may in writing disapprove the use of any true or fictitious name., Part 2, Chapter 5, Article 12, Rule 1724.5)
+IMPORTANT VERIFICATION STEPS:
+1. Before attributing a direct quote to a specific Rule, double-check that the exact text appears in the Rule you're citing.
+2. Verify that each Rule number you cite actually contains the content you're referencing.
+3. For paraphrases, ensure the original text you're citing comes from the same Rule number.
+4. Be extra careful not to mix up Rule numbers - confirm each Rule number directly from the context.
+
+Examples of correct citation:
+- Direct quote: "Every interest in property, or any relation thereto, or liability in respect thereof, of such a nature that a contemplated peril might directly damnify the insured, is an insurable interest." (Part 1, Chapter 2, Article 4, Rule 281)
+- Paraphrase: *An insurance policy is void if the insured lacks an insurable interest.* (If the insured has no insurable interest, the contract is void., Part 1, Chapter 2, Article 4, Rule 280)
 
 Provide a concise legal answer grounded in the context.
 """)
