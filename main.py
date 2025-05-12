@@ -2,13 +2,17 @@ import streamlit as st
 import asyncio
 import traceback
 from dotenv import load_dotenv
-from backend import get_workflow
+from backend import build_full_workflow
 from langchain_core.tracers.context import collect_runs
 from langsmith import Client
 from helper.entity_checker import check_entities
 from langchain_openai import ChatOpenAI
 
 load_dotenv()
+
+@st.cache_resource
+def cached_workflow():
+    return build_full_workflow().compile()
 
 def init_client():
     try:
@@ -21,7 +25,7 @@ def init_client():
 
 def sidebar():
     with st.sidebar:
-        st.title("📜 Insurance Law Chatbot")
+        st.title("\U0001F4DC Insurance Law Chatbot")
         st.markdown(
             """
             This assistant answers questions about the California Insurance Code.
@@ -34,7 +38,7 @@ def sidebar():
             """
         )
         st.markdown("---")
-        if st.button("🔄 New Conversation"):
+        if st.button("\U0001F504 New Conversation"):
             st.session_state.history = []
             for k in list(st.session_state.keys()):
                 if k.startswith("feedback_") or k.startswith("rating_"):
@@ -74,7 +78,7 @@ async def run_workflow(query: str):
         return clarifying_question, None
     
     # Proceed with normal workflow if entities are present
-    graph = get_workflow().compile()
+    graph = cached_workflow()
     final = None
     run_id = None
     with collect_runs() as cb:
@@ -94,8 +98,17 @@ async def run_workflow(query: str):
 # Initialize
 client = init_client()
 st.set_page_config(page_title="Insurance Law Chatbot", layout="centered")
-st.title("🤖 Insurance Law Chatbot")
+st.title("\U0001F916 Insurance Law Chatbot")
 sidebar()
+
+# Show PDF ingestion status to the user
+with st.status("Parsing and indexing PDFs. Please wait…", expanded=True) as status:
+    try:
+        workflow = cached_workflow()
+        status.update(label="PDFs parsed and indexed. Ready for questions!", state="complete")
+    except Exception as e:
+        status.update(label=f"Error during PDF ingestion: {e}", state="error")
+        st.stop()
 
 if "history" not in st.session_state:
     st.session_state.history = []

@@ -4,7 +4,7 @@ from helper.db_connection      import initialize_vector_store
 from helper.pdf_ingestion      import ingest_pdfs
 from helper.assemble_workflow  import get_workflow as build_workflow
 
-def get_workflow():
+def build_full_workflow():
     """
     Load env → init vector store → ingest PDFs → assemble workflow graph.
     """
