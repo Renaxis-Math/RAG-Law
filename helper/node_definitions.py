@@ -93,7 +93,7 @@ def web_search_node(state, web_tool):
 
 def gen_answer(state, llm_primary):
     """
-    Generate the final answer.
+    Generate the final answer using the LLM, letting the prompt handle citation formatting.
     """
     q      = state.get("original", state["question"])
     prompt = answer_template.format(context=state["documents"], question=q)
