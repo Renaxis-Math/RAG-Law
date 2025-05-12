@@ -47,7 +47,18 @@ Use the following context to answer the question:
 Context: {context}
 Question: {question}
 
-Provide a concise legal answer grounded in the context. Cite sources.
+For each part of your answer:
+- If you use a sentence or phrase directly from the context, wrap it in double quotes and add a citation in parentheses with the format:
+  (Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}})
+- If you paraphrase or summarize a sentence or phrase from the context, italicize your paraphrase and add a citation in parentheses, starting with the original phrase/sentence from the document, followed by the part/chapter/article/rule:
+  (*your paraphrase* (original phrase from document, Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}}))
+- Only cite if the information comes from the context.
+
+Example:
+"The commissioner may in writing disapprove the use of any true or fictitious name." (Part 2, Chapter 5, Article 12, Rule 1724.5)
+*The commissioner can reject a business name in writing.* (The commissioner may in writing disapprove the use of any true or fictitious name., Part 2, Chapter 5, Article 12, Rule 1724.5)
+
+Provide a concise legal answer grounded in the context.
 """)
 
 # Hallucination check

@@ -4,22 +4,48 @@ PDF_CHUNK_OVERLAP = 50   # higher = more overlap;      range = [0, PDF_CHUNK_SIZ
 
 import os
 import glob
+import re
 from typing import List
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
+def extract_structure(text: str, last: dict) -> dict:
+    """
+    Extract Part, Chapter, Article, Rule/Section from text using regex.
+    If not found, use last known value.
+    """
+    structure = last.copy()
+    part_match = re.search(r"PART\s+([\w\d\-]+)", text, re.IGNORECASE)
+    chapter_match = re.search(r"CHAPTER\s+([\w\d\-]+)", text, re.IGNORECASE)
+    article_match = re.search(r"ARTICLE\s+([\w\d\-]+)", text, re.IGNORECASE)
+    rule_match = re.search(r"(?:RULE|SECTION)\s+([\w\d\-\.]+)", text, re.IGNORECASE)
+    if part_match:
+        structure["part"] = part_match.group(1)
+    if chapter_match:
+        structure["chapter"] = chapter_match.group(1)
+    if article_match:
+        structure["article"] = article_match.group(1)
+    if rule_match:
+        structure["rule"] = rule_match.group(1)
+    return structure
+
 def parse_pdf(path: str, source: str) -> List[Document]:
     """
-    Parse a PDF file into Document objects, one per page.
+    Parse a PDF file into Document objects, one per page, extracting structure info.
     """
     docs: List[Document] = []
+    last_structure = {"part": None, "chapter": None, "article": None, "rule": None}
     try:
         loader = PyMuPDFLoader(file_path=path, mode="page")
         pages = loader.load()
         for page in pages:
             page.metadata = page.metadata or {}
             page.metadata["source"] = source
+            # Extract structure from page content
+            structure = extract_structure(page.page_content, last_structure)
+            page.metadata.update(structure)
+            last_structure = structure
             docs.append(page)
     except Exception as e:
         print(f"Error parsing {path}: {e}")
@@ -72,6 +98,7 @@ def ingest_pdfs(data_dir: str, vector_store) -> int:
     chunks: List[Document] = []
     for page in all_pages:
         for txt in splitter.split_text(page.page_content):
+            # Pass along the structure metadata
             chunks.append(Document(page_content=txt, metadata=page.metadata.copy()))
 
     if chunks:
