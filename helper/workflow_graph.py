@@ -3,9 +3,9 @@ from typing import List
 from langchain_core.documents import Document
 from langchain.load import dumps, loads
 
-RRF_K = 60          # higher = smoother aggregation; range = [0, inf)
-MAX_HALL   = 1      # higher = more attempts; range = [0, inf)
-MAX_VERIFY = 1      # higher = more attempts; range = [0, inf)
+RRF_K = 60              # higher = smoother aggregation; range = [0, inf)
+MAX_HALL   = 10         # higher = more attempts; range = [0, inf)
+MAX_VERIFY = 10         # higher = more attempts; range = [0, inf)
 
 class GraphState(TypedDict):
     question: str
