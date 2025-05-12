@@ -14,9 +14,9 @@ from helper.node_definitions import (
 )
 
 OPENAI_PRIMARY_MODEL       = "gpt-4o"      # higher = more powerful; range = available OpenAI chat models
-OPENAI_PRIMARY_TEMPERATURE = 0.2           # higher = more creative; range = [0.0, 1.0]
+OPENAI_PRIMARY_TEMPERATURE = 0.3           # higher = more creative; range = [0.0, 1.0]
 OPENAI_FAST_MODEL          = "gpt-4o-mini" # higher = more powerful; range = available OpenAI chat models
-OPENAI_FAST_TEMPERATURE    = 0.2           # higher = more creative; range = [0.0, 1.0]
+OPENAI_FAST_TEMPERATURE    = 0.3           # higher = more creative; range = [0.0, 1.0]
 WEB_TOOL_MAX_RESULTS       = 5             # higher = fetch more results; range = [1, ∞)
 WEB_TOOL_SEARCH_DEPTH      = "advanced"    # options = ["basic","advanced"]
 WEB_TOOL_INCLUDE_ANSWER    = True          # boolean flag; range = [True, False]
