@@ -5,11 +5,11 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from helper.workflow_graph import GraphState, reciprocal_rank_fusion
 from helper.node_definitions import (
     create_multi_query_chain, create_retriever,
-    init_and_route, document_retriever, grade_docs,
+    init_and_route, document_retriever,
     web_search_node, gen_answer, hallucination_checker,
     answer_verifier, rewrite_query, chitchat_node,
     decide_after_docs, decide_after_hall, decide_after_verify,
-    hall_fail_node, ver_fail_node
+    hall_fail_node, ver_fail_node, grade_docs_with_embeddings
 )
 
 OPENAI_PRIMARY_MODEL       = "gpt-4o"      # higher = more powerful; range = available OpenAI chat models
@@ -47,8 +47,10 @@ def create_workflow(openai_api_key: str, tavily_api_key: str, vector_store):
     router_fn      = lambda state: init_and_route(state, llm_primary)
     retriever_fn   = lambda state: document_retriever(state, retriever_chain)
 
-    async def relevance_fn(state):
-        return await grade_docs(state, llm_fast)
+    # Use embedding-based relevance grading
+    embedding_model = vector_store._embedding
+    def relevance_fn(state):
+        return grade_docs_with_embeddings(state, embedding_model)
 
     websearch_fn   = lambda state: web_search_node(state, web_tool)
     answer_fn      = lambda state: gen_answer(state, llm_primary)
@@ -59,7 +61,7 @@ def create_workflow(openai_api_key: str, tavily_api_key: str, vector_store):
 
     workflow.add_node("Router", router_fn)
     workflow.add_node("Retriever", retriever_fn)
-    workflow.add_node("RelevanceGrader", relevance_fn)        # async node
+    workflow.add_node("RelevanceGrader", relevance_fn)        # now sync node
     workflow.add_node("Websearch", websearch_fn)
     workflow.add_node("Generate", answer_fn)
     workflow.add_node("HallucinationChecker", hall_check_fn)

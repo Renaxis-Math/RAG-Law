@@ -1,6 +1,7 @@
 import asyncio
 from langchain_core.messages import HumanMessage, SystemMessage
 import difflib
+import numpy as np
 
 from helper.prompt_templates import (
     router_template, multi_query_template, relevance_template,
@@ -56,17 +57,30 @@ def document_retriever(state, retriever):
     })
     return {"documents": docs, "doc_checker": None}
 
-async def grade_docs(state, llm_fast):
-    tasks = [
-        llm_fast.with_structured_output(method="json_mode").ainvoke(
-            relevance_template.format(document=d, question=state["question"])
-        )
-        for d in state["documents"]
-    ]
-    results = await asyncio.gather(*tasks)
-    passed     = [d for d, r in zip(state["documents"], results) if r["binary_score"].lower()=="pass"]
+def cosine_similarity(a, b):
+    a = np.array(a)
+    b = np.array(b)
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+RELEVANCE_THRESHOLD = 0.9
+
+def grade_docs_with_embeddings(state, embedding_model):
+    question_emb = embedding_model.embed_query(state["question"])
+    passed = []
+    preds = []
+    scores = []
+    for doc in state["documents"]:
+        doc_emb = embedding_model.embed_query(doc.page_content)
+        score = cosine_similarity(question_emb, doc_emb)
+        scores.append(score)
+        is_relevant = score > RELEVANCE_THRESHOLD
+        preds.append(is_relevant)
+        if is_relevant:
+            passed.append(doc)
     fail_count = len(state["documents"]) - len(passed)
-    checker    = "fail" if (fail_count/len(state["documents"]))>=0.5 else "pass"
+    checker = "fail" if (fail_count / len(state["documents"])) >= 0.5 else "pass"
+    state["relevance_scores"] = scores
+    state["relevance_preds"] = preds
     return {"documents": passed, "doc_checker": checker}
 
 def web_search_node(state, web_tool):
