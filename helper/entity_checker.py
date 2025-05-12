@@ -21,6 +21,7 @@ You must respond with a valid JSON object in this exact format:
 }
 """
 
+# USED GPT FOR THIS
 def check_entities(question: str, llm: ChatOpenAI) -> Tuple[bool, bool, str]:
 
     response = llm.invoke([
