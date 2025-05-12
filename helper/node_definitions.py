@@ -85,7 +85,7 @@ async def grade_docs(state, llm_fast):
 
 def web_search_node(state, web_tool):
     """
-    Perform web‐search fallback.
+    Perform web-search fallback.
     """
     hits  = web_tool.invoke(state["question"])
     pages = [{"metadata":{"title":r["title"],"url":r["url"]},"page_content":r["content"]} for r in hits]

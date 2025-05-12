@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from backend import get_workflow
 from langchain_core.tracers.context import collect_runs
 from langsmith import Client
+from helper.entity_checker import check_entities
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
@@ -58,6 +60,20 @@ def feedback_form(idx, run_id, client):
                 st.rerun()
 
 async def run_workflow(query: str):
+    # Initialize LLM for entity checking
+    llm = ChatOpenAI(
+        model="gpt-4",
+        temperature=0.0
+    )
+    
+    # Check entities first
+    has_california, has_insurance, clarifying_question = check_entities(query, llm)
+    
+    # If missing required entities, return clarifying question
+    if not (has_california and has_insurance):
+        return clarifying_question, None
+    
+    # Proceed with normal workflow if entities are present
     graph = get_workflow().compile()
     final = None
     run_id = None
