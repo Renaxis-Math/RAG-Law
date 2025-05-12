@@ -8,6 +8,7 @@ from langchain_core.documents import Document
 PDF_CHUNK_SIZE    = 500  # higher = larger text chunks; range = [1, ∞)
 PDF_CHUNK_OVERLAP = 50   # higher = more overlap;      range = [0, PDF_CHUNK_SIZE]
 
+# USED GPT FOR THIS
 def extract_structure(text: str, last: dict) -> dict:
     structure = last.copy()
     part_match = re.search(r"PART\s+([\w\d\-]+)", text, re.IGNORECASE)
