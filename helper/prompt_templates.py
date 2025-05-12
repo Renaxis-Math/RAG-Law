@@ -56,11 +56,6 @@ IMPORTANT VERIFICATION STEPS:
 3. For paraphrases, ensure the original text you're citing comes from the same Rule number.
 4. Be extra careful not to mix up Rule numbers - confirm each Rule number directly from the context.
 
-Examples of correct citation:
-- Direct quote: "Every interest in property, or any relation thereto, or liability in respect thereof, of such a nature that a contemplated peril might directly damnify the insured, is an insurable interest." 
-(Part 1, Chapter 2, Article 4, Rule 281)
-- Paraphrase: *An insurance policy is void if the insured lacks an insurable interest.* (If the insured has no insurable interest, the contract is void., Part 1, Chapter 2, Article 4, Rule 280)
-
 Provide a concise legal answer grounded in the context.
 """)
 
