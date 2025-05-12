@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, END
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.tools.tavily_search import TavilySearchResults
+import os
 
 from helper.workflow_graph import GraphState, reciprocal_rank_fusion
 from helper.node_definitions import (
@@ -13,9 +14,9 @@ from helper.node_definitions import (
 )
 
 OPENAI_PRIMARY_MODEL       = "gpt-4o"      # higher = more powerful; range = available OpenAI chat models
-OPENAI_PRIMARY_TEMPERATURE = 0.3           # higher = more creative; range = [0.0, 1.0]
+OPENAI_PRIMARY_TEMPERATURE = 0.2           # higher = more creative; range = [0.0, 1.0]
 OPENAI_FAST_MODEL          = "gpt-4o-mini" # higher = more powerful; range = available OpenAI chat models
-OPENAI_FAST_TEMPERATURE    = 0.0           # higher = more creative; range = [0.0, 1.0]
+OPENAI_FAST_TEMPERATURE    = 0.2           # higher = more creative; range = [0.0, 1.0]
 WEB_TOOL_MAX_RESULTS       = 5             # higher = fetch more results; range = [1, ∞)
 WEB_TOOL_SEARCH_DEPTH      = "advanced"    # options = ["basic","advanced"]
 WEB_TOOL_INCLUDE_ANSWER    = True          # boolean flag; range = [True, False]
@@ -47,8 +48,18 @@ def create_workflow(openai_api_key: str, tavily_api_key: str, vector_store):
     router_fn      = lambda state: init_and_route(state, llm_primary)
     retriever_fn   = lambda state: document_retriever(state, retriever_chain)
 
-    # Use embedding-based relevance grading
-    embedding_model = vector_store._embedding
+    embedding_model = None
+    
+    if hasattr(vector_store, "embeddings"):
+        embedding_model = vector_store.embeddings
+    
+    if embedding_model is None:
+        print("Creating new embedding model instance")
+        embedding_model = OpenAIEmbeddings(
+            model="text-embedding-3-large",
+            api_key=os.environ.get("OPENAI_API_KEY")
+        )
+    
     def relevance_fn(state):
         return grade_docs_with_embeddings(state, embedding_model)
 

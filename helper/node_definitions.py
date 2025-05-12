@@ -65,20 +65,36 @@ def cosine_similarity(a, b):
 RELEVANCE_THRESHOLD = 0.9
 
 def grade_docs_with_embeddings(state, embedding_model):
-    question_emb = embedding_model.embed_query(state["question"])
+    question_text = state["question"]
+    try:
+        question_emb = embedding_model.embed_query(question_text)
+    except Exception as e:
+        raise RuntimeError(f"Failed to embed question: {e}")
+    
     passed = []
     preds = []
     scores = []
+    
     for doc in state["documents"]:
-        doc_emb = embedding_model.embed_query(doc.page_content)
+        doc_text = doc.page_content
+        doc_emb = embedding_model.embed_query(doc_text)
+            
         score = cosine_similarity(question_emb, doc_emb)
         scores.append(score)
+        
         is_relevant = score > RELEVANCE_THRESHOLD
         preds.append(is_relevant)
+        
         if is_relevant:
             passed.append(doc)
-    fail_count = len(state["documents"]) - len(passed)
-    checker = "fail" if (fail_count / len(state["documents"])) >= 0.5 else "pass"
+    
+    # Handle empty results
+    if not state["documents"] or len(scores) == 0:
+        checker = "fail"
+    else:
+        fail_count = len(scores) - len(passed)
+        checker = "fail" if (fail_count / len(scores)) >= 0.5 else "pass"
+    
     state["relevance_scores"] = scores
     state["relevance_preds"] = preds
     return {"documents": passed, "doc_checker": checker}
