@@ -44,7 +44,8 @@ Question: {question}
 Follow these requirements for citations in your answer:
 - If you use a sentence or phrase directly from the context, wrap it in double quotes and add a citation in parentheses with the format:
   (Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}})
-- If you paraphrase or summarize a sentence or phrase from the context, italicize your paraphrase and add a citation in parentheses, starting with the original phrase/sentence from the document, followed by the part/chapter/article/rule:
+- If you paraphrase or summarize a sentence or phrase from the context, italicize your paraphrase and add a citation in parentheses, 
+  starting with the original phrase/sentence from the document, followed by the part/chapter/article/rule:
   (*your paraphrase* (original phrase from document, Part {{part}}, Chapter {{chapter}}, Article {{article}}, Rule {{rule}}))
 - Only cite if the information comes from the context.
 - Omit any field that is missing, but always keep the order: Part, Chapter, Article, Rule.
