@@ -8,10 +8,10 @@ from helper.prompt_templates import (
 )
 from helper.workflow_graph import MAX_HALL, MAX_VERIFY
 
-RETRIEVER_SEARCH_K    = 5    # higher = consider more docs; range = [1, inf)
-RETRIEVER_FETCH_K     = 20   # higher = fetch more docs;     range = [1, inf)
-RETRIEVER_LAMBDA_MULT = 0.1  # higher = more diversity;     range = [0.0, 1.0]
-RELEVANCE_THRESHOLD = 0.9
+RETRIEVER_SEARCH_K      = 5    # higher = consider more docs; range = [1, inf)
+RETRIEVER_FETCH_K       = 20   # higher = fetch more docs;     range = [1, inf)
+RETRIEVER_LAMBDA_MULT   = 0.1  # higher = more diversity;     range = [0.0, 1.0]
+RELEVANCE_THRESHOLD     = 0.9
 
 def create_multi_query_chain(llm_primary):
     from langchain_core.output_parsers import StrOutputParser
