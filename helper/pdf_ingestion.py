@@ -64,7 +64,6 @@ def parse_pdf(path: str, source: str) -> List[Document]:
 
 def check_document_exists(vector_store, source_name: str) -> bool:
     try:
-
         results = vector_store.similarity_search(
             query="",
             k = 1,                              # We only need to know if any exist
