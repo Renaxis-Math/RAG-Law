@@ -4,22 +4,15 @@ from helper.db_connection      import initialize_vector_store
 from helper.pdf_ingestion      import ingest_pdfs
 from helper.assemble_workflow  import get_workflow as build_workflow
 
-def get_workflow():
-    """
-    Load env → init vector store → ingest PDFs → assemble workflow graph.
-    """
-    # 1) Env
+def build_full_workflow():
     env_vars = load_environment()
 
-    # 2) Vector store
     vector_store = initialize_vector_store(
         connection_string=env_vars["DB_CONNECTION"],
         api_key=env_vars["OPENAI_API_KEY"]
     )
 
-    # 3) PDF ingestion
     data_dir = os.path.join(os.path.dirname(__file__), "Data")
     ingest_pdfs(data_dir, vector_store)
 
-    # 4) Build RAG workflow
     return build_workflow(env_vars, vector_store)

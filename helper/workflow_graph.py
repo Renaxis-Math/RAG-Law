@@ -3,18 +3,11 @@ from typing import List
 from langchain_core.documents import Document
 from langchain.load import dumps, loads
 
-# Hyperparameter for Reciprocal Rank Fusion
-RRF_K = 60  # higher = smoother aggregation; range = [0, ∞)
-
-# Max allowable hallucination attempts
-MAX_HALL   = 1  # higher = more attempts; range = [0, ∞)
-# Max allowable verification attempts
-MAX_VERIFY = 1  # higher = more attempts; range = [0, ∞)
+RRF_K = 60              # higher = smoother aggregation; range = [0, inf)
+MAX_HALL   = 10         # higher = more attempts; range = [0, inf)
+MAX_VERIFY = 10         # higher = more attempts; range = [0, inf)
 
 class GraphState(TypedDict):
-    """
-    Schema for the workflow graph's state dictionary.
-    """
     question: str
     original: str
     generation: str
@@ -27,9 +20,6 @@ class GraphState(TypedDict):
     verify_checker: str
 
 def reciprocal_rank_fusion(results, k: int = RRF_K):
-    """
-    Merge multiple retrieval lists with Reciprocal Rank Fusion.
-    """
     scores = {}
     for docs in results:
         for i, doc in enumerate(docs):
