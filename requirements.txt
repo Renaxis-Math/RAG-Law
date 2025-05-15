@@ -1,0 +1,31 @@
+# Web UI
+streamlit>=1.44.0
+streamlit-feedback>=0.1.4
+
+# Env‐vars
+python-dotenv>=1.0.0
+
+# Database & Vector store
+SQLAlchemy>=2.0.0
+psycopg-binary>=3.0.0
+langchain-postgres>=0.0.13
+
+# Core LangChain packages
+langchain>=0.3.21
+langchain-core>=0.3.49
+langchain-openai>=0.3.11
+langchain-community>=0.3.20
+
+# OpenAI & LangSmith (tracing & feedback)
+openai>=1.0.0
+langsmith>=0.3.19
+
+# Graph orchestration
+langgraph>=0.3.21
+
+# PDF loader
+pymupdf>=1.18.0
+
+# Streamlit visualization support
+altair>=5.5.0
+vega_datasets>=0.9.0
